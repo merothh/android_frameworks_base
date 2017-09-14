@@ -1,6 +1,8 @@
 package com.android.systemui.qs;
 
+import android.content.ContentResolver;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.util.AttributeSet;
 import android.view.View;
@@ -9,6 +11,8 @@ import android.view.ViewGroup;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSPanel.QSTileLayout;
 import com.android.systemui.qs.QSPanel.TileRecord;
+
+import cyanogenmod.providers.CMSettings;
 
 import java.util.ArrayList;
 
@@ -74,7 +78,10 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
 
     public boolean updateResources() {
         final Resources res = mContext.getResources();
-        final int columns = Math.max(1, res.getInteger(R.integer.quick_settings_num_columns));
+        final ContentResolver resolver = mContext.getContentResolver();
+        final int columnsConfig = CMSettings.Secure.getInt(resolver,
+                CMSettings.Secure.QS_COLUMNS, 4);
+        final int columns = Math.max(1, columnsConfig);
         mCellHeight = mContext.getResources().getDimensionPixelSize(R.dimen.qs_tile_height);
         mCellMargin = res.getDimensionPixelSize(R.dimen.qs_tile_margin);
         mCellMarginTop = res.getDimensionPixelSize(R.dimen.qs_tile_margin_top);

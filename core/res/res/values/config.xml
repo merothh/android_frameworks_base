@@ -1004,6 +1004,9 @@
     <!-- Number of notifications to keep in the notification service historical archive -->
     <integer name="config_notificationServiceArchiveSize">100</integer>
 
+    <!-- Quick settings tiles columns and rows config -->
+    <integer name="config_qs_num_rows_landscape_default">2</integer>
+    
     <!-- Allow the menu hard key to be disabled in LockScreen on some devices -->
     <bool name="config_disableMenuKeyInLockScreen">false</bool>
 

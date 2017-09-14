@@ -146,6 +146,7 @@ import com.android.systemui.R;
 import com.android.systemui.SystemUIFactory;
 import com.android.systemui.classifier.FalsingLog;
 import com.android.systemui.classifier.FalsingManager;
+import com.android.systemui.cm.UserContentObserver;
 import com.android.systemui.doze.DozeHost;
 import com.android.systemui.doze.DozeLog;
 import com.android.systemui.keyguard.KeyguardViewMediator;
@@ -216,6 +217,8 @@ import com.android.systemui.statusbar.stack.StackStateAnimator;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.volume.VolumeComponent;
 
+import cyanogenmod.providers.CMSettings;
+
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -225,8 +228,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import cyanogenmod.providers.CMSettings;
 
 import static android.service.notification.NotificationListenerService.Ranking.importanceToLevel;
 
@@ -480,6 +481,55 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             mLinger = BRIGHTNESS_CONTROL_LINGER_THRESHOLD + 1;
         }
     };
+
+    class SettingsObserver extends UserContentObserver {
+        SettingsObserver(Handler handler) {
+            super(handler);
+        }
+
+        @Override
+        protected void observe() {
+            super.observe();
+
+            ContentResolver resolver = mContext.getContentResolver();
+            resolver.registerContentObserver(CMSettings.Secure.getUriFor(
+                     CMSettings.Secure.QS_ROWS_PORTRAIT),
+                   false, this, UserHandle.USER_ALL);
+            resolver.registerContentObserver(CMSettings.Secure.getUriFor(
+                    CMSettings.Secure.QS_ROWS_LANDSCAPE),
+                    false, this, UserHandle.USER_ALL);
+            resolver.registerContentObserver(CMSettings.Secure.getUriFor(
+                    CMSettings.Secure.QS_COLUMNS),
+                    false, this, UserHandle.USER_ALL);
+            update();
+        }
+
+        @Override
+        protected void unobserve() {
+            super.unobserve();
+            ContentResolver resolver = mContext.getContentResolver();
+            resolver.unregisterContentObserver(this);
+        }
+
+		@Override
+		public void onChange(boolean selfChange, Uri uri) {
+		    if (uri.equals(CMSettings.Secure.getUriFor(
+                    CMSettings.Secure.QS_ROWS_PORTRAIT))
+                    || uri.equals(CMSettings.Secure.getUriFor(
+                    CMSettings.Secure.QS_ROWS_LANDSCAPE))) {
+                    updateResources();
+            } else if (uri.equals(CMSettings.Secure.getUriFor(
+                    CMSettings.Secure.QS_COLUMNS))) {
+                    updateResources();
+            }
+            update();
+        }
+
+        @Override
+        public void update() {
+            ContentResolver resolver = mContext.getContentResolver();
+        }
+    }
 
     class DevForceNavbarObserver extends ContentObserver {
         DevForceNavbarObserver(Handler handler) {

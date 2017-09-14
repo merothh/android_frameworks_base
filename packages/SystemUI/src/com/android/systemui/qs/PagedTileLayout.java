@@ -1,5 +1,6 @@
 package com.android.systemui.qs;
 
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -14,6 +15,8 @@ import android.view.ViewGroup;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSPanel.QSTileLayout;
 import com.android.systemui.qs.QSPanel.TileRecord;
+
+import cyanogenmod.providers.CMSettings;
 
 import java.util.ArrayList;
 
@@ -281,11 +284,16 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
 
         private int getRows() {
             final Resources res = getContext().getResources();
-            if (res.getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
-                // Always have 3 rows in portrait.
-                return 3;
-            }
-            return Math.max(1, res.getInteger(R.integer.quick_settings_num_rows));
+            final ContentResolver resolver = mContext.getContentResolver();
+            final boolean isPortrait = res.getConfiguration().orientation
+                    == Configuration.ORIENTATION_PORTRAIT;
+            final int columnsPortrait = CMSettings.Secure.getInt(resolver,
+                    CMSettings.Secure.QS_ROWS_PORTRAIT, 3);
+            final int columnsLandscape = CMSettings.Secure.getInt(resolver,
+                    CMSettings.Secure.QS_ROWS_LANDSCAPE, res.getInteger(
+                    com.android.internal.R.integer.config_qs_num_rows_landscape_default));
+            final int columns = Math.max(1, isPortrait ? columnsPortrait : columnsLandscape);
+            return Math.max(1, isPortrait ? columnsPortrait : columnsLandscape);
         }
 
         public void setMaxRows(int maxRows) {
