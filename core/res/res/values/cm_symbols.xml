@@ -112,4 +112,8 @@
 
     <!-- Quick settings tiles columns and rows config -->
     <java-symbol type="integer" name="config_qs_num_rows_landscape_default"/>
+
+    <!-- global actions (zen mode buttons) -->
+    <java-symbol type="id" name="option4" />
+
 </resources>
